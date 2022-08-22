@@ -49,12 +49,11 @@ const cleanData = (day) => {
   const punchedTimes = insAndOuts.filter(punched => {
     if (punched) return punched
   })
-
-  if (punchedTimes.length % 2) throw 'Marcação ímpar'
+  
+  if (punchedTimes.length % 2) throw new Error('Marcação ímpar não é permitida!')
 
   return punchedTimes.map(punched => {
-    const convertedPunched = convertToDate(punched)
-    return convertedPunched
+    return convertToDate(punched)
   })
 }
 
@@ -79,7 +78,7 @@ const calculateHours = (day) => {
   const chuncks = prepareDateToCalc(convertedPunched)
 
   let workedHours = 0
-  const totalHours = chuncks.map(
+  chuncks.map(
     (chunck) => {
       workedHours += (dateFns.differenceInSeconds(chunck[1], chunck[0])) / 60
     })
@@ -113,17 +112,22 @@ input.addEventListener('change', async () => {
 
   const results = new Converter(options)
 
-  const { workedDays } = getAllWorkedDays(results.data.Report)
-  const response  = getWorkedHours(workedDays) 
+  try {
+    const { workedDays } = getAllWorkedDays(results.data.Report)
+    const response  = getWorkedHours(workedDays) 
+    response.forEach(workedDay => {
+      const markup = `
+      <tr>
+        <td>${workedDay.date}</td>
+        <td>${workedDay.workedHours}</td>
+        <td>${workedDay.compensatoryTime}</td>
+      <tr>
+  `
+  document.getElementById("data_list").innerHTML += markup;
 
-  response.forEach(workedDay => {
-    const markup = `
-    <tr>
-      <td>${workedDay.date}</td>
-      <td>${workedDay.workedHours}</td>
-      <td>${workedDay.compensatoryTime}</td>
-    <tr>
-`
-document.getElementById("data_list").innerHTML += markup;
-
-})})
+  })
+  } catch (error) {
+    document.getElementById("error").innerHTML += error
+    throw error
+  }
+})
