@@ -65,14 +65,15 @@ const prepareDateToCalc = convertedPunched => {
   }, [])
 }
 
-const timeConvert = (n) => {
-  const num = n;
+const timeConvert = (n) => { 
+  const num = n > 0 ? n : -1*n
   const hours = (num / 60);
   const rhours = Math.floor(hours);
   const minutes = (hours - rhours) * 60;
   const rminutes = Math.round(minutes);
   return `${rhours}h e ${rminutes}min`
 }
+
 const calculateHours = (day) => {
   const convertedPunched = cleanData(day)
   const chuncks = prepareDateToCalc(convertedPunched)
@@ -85,10 +86,11 @@ const calculateHours = (day) => {
 
   
   const convertedDate = dateFns.format(excelTimestampToDate(day[0]), 'dd/MM/yyyy - ccc')
+  const compensatoryTime = (workedHours - 480) >= 0 ? timeConvert(workedHours - 480) : `- ${timeConvert((workedHours - 480))}`
 
   return {
     workedHours: timeConvert(workedHours),
-    compensatoryTime: timeConvert(workedHours - 480),
+    compensatoryTime,
     convertedDate
   }
 }
